@@ -455,7 +455,7 @@ pp.flowParseObjectType = function (allowStatic, allowExact, allowSpread) {
           this.unexpected();
         }
         this.expect(tt.ellipsis);
-        node.argument = this.flowParsePrimaryType();
+        node.argument = this.flowParseType();
         this.flowObjectTypeSemicolon();
         nodeStart.properties.push(this.finishNode(node, "ObjectTypeSpreadProperty"));
       } else {

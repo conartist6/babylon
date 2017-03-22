@@ -1,3 +1,3 @@
-interface A = {
+interface A {
 	...any,
 };

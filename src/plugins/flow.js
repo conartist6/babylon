@@ -452,7 +452,13 @@ pp.flowParseObjectType = function (allowStatic, allowExact, allowSpread) {
     } else {
       if (this.match(tt.ellipsis)) {
         if (!allowSpread) {
-          this.unexpected();
+          this.unexpected(
+            null,
+            "Spread operator cannnot appear in class or interface definitions"
+          );
+        }
+        if (variance) {
+          this.unexpected(variance.start, "Spread properties cannot have variance");
         }
         this.expect(tt.ellipsis);
         node.argument = this.flowParseType();

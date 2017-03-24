@@ -69,7 +69,7 @@ pp.flowParseTypeAndPredicateInitialiser = function () {
 
 pp.flowParseDeclareClass = function (node) {
   this.next();
-  this.flowParseInterfaceish(node, true);
+  this.flowParseInterfaceish(node);
   return this.finishNode(node, "DeclareClass");
 };
 
@@ -194,7 +194,7 @@ pp.flowParseDeclareInterface = function (node) {
 
 // Interfaces
 
-pp.flowParseInterfaceish = function (node, allowStatic) {
+pp.flowParseInterfaceish = function (node) {
   node.id = this.parseIdentifier();
 
   if (this.isRelational("<")) {
@@ -219,7 +219,7 @@ pp.flowParseInterfaceish = function (node, allowStatic) {
     } while (this.eat(tt.comma));
   }
 
-  node.body = this.flowParseObjectType(allowStatic, false, false);
+  node.body = this.flowParseObjectType(true, false, false);
 };
 
 pp.flowParseInterfaceExtends = function () {
@@ -236,7 +236,7 @@ pp.flowParseInterfaceExtends = function () {
 };
 
 pp.flowParseInterface = function (node) {
-  this.flowParseInterfaceish(node, false);
+  this.flowParseInterfaceish(node);
   return this.finishNode(node, "InterfaceDeclaration");
 };
 
@@ -1393,10 +1393,10 @@ export default function (instance) {
         }
       }
 
-      // Need to push something onto the context to stop
-      // the JSX plugin from messing with the tokens
-      this.state.context.push(ct.parenExpression);
       if (jsxError != null || this.isRelational("<")) {
+        // Need to push something onto the context to stop
+        // the JSX plugin from messing with the tokens
+        this.state.context.push(ct.parenExpression);
         let arrowExpression;
         let typeParameters;
         try {
@@ -1406,8 +1406,12 @@ export default function (instance) {
           arrowExpression.typeParameters = typeParameters;
           this.resetStartLocationFromNode(arrowExpression, typeParameters);
         } catch (err) {
+          this.state.context.pop();
+
           throw jsxError || err;
         }
+
+        this.state.context.pop();
 
         if (arrowExpression.type === "ArrowFunctionExpression") {
           return arrowExpression;
@@ -1420,7 +1424,6 @@ export default function (instance) {
           );
         }
       }
-      this.state.context.pop();
 
       return inner.apply(this, args);
     };
